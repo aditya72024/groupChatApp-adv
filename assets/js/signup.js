@@ -58,7 +58,7 @@ const getSignUpData = async(data) => {
         // console.log(error.response.data);
         if(error){
                 let errorMessage = "";
-                (error.response.data.err.errors).forEach(err => {
+                (error.response.data.error.errors).forEach(err => {
                         errorMessage += err.message+'\n';
                     
                     });
