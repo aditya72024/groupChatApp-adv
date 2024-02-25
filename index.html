@@ -43,8 +43,8 @@
 
 <div class = "container">
     <div class ="row">
-        <div class="col-md-12"> 
-            <ul class="list-group">
+        <div class="col-md-12" id="chatDiv" style="display: none;"> 
+            <ul class="list-group" id="chatUl">
          
               
               
@@ -54,7 +54,7 @@
              
               </ul>
         </div> 
-        <div class="col-md-12 mt-5">
+        <div class="col-md-12 mt-5" >
             <div class="row">
 
                 <div class="col-md-11 col-sm-12 col-xs-12">
@@ -87,6 +87,24 @@
 <script type="text/javascript">
     var token = localStorage.getItem('token');
     var sendButton = document.getElementById("sendMessage");
+    var chatDiv = document.getElementById("chatDiv");
+
+    window.addEventListener("DOMContentLoaded",()=>{
+
+
+            if(token !=="null"){
+
+                    loadChats();
+            }else{
+                window.location.href = "login.html";
+            }
+                
+
+
+})
+
+
+
     sendButton.addEventListener('click',()=>{
        const message = document.getElementById("message").value;
        if(message != ''){
@@ -104,7 +122,7 @@
         try{
                 const res = await axios.post("http://localhost:5100/chat/postMessage",{data},{headers: {"Authorization":token}})
                 alert("Message Sent!!!");
-                console.log(res.data);
+                loadChats();
 
             }catch(error){
                 if(error){
@@ -113,6 +131,69 @@
             }
 
     }
+
+    const loadChats = async () =>{
+
+        try{
+
+                const response = await axios.get(`http://localhost:5100/chat/getChats`, {headers: {"Authorization":token}})
+                console.log(response.data)
+                
+
+                if(response.data.length > 0){
+
+                    
+                    document.getElementById("chatUl").innerHTML = " ";
+                   
+
+                    for(var i = 0; i<response.data.length;i++){
+                        showChats(response.data[i]);   
+                    }
+                    chatDiv.style.display = "block";
+
+                }else{
+                    chatDiv.style.display = "none";
+                }
+
+            }catch(error){
+                if(error){
+                    alert("Something went wrong !!!");
+                }
+            }
+
+    }
+
+
+    function showChats(data){
+
+
+
+if(data){
+
+      chatDiv.style.display = "block";
+     
+}  
+
+var message = data.message;
+var username = data.user.username;
+
+
+
+var value = username + '-' + message;
+
+li = document.createElement("li");
+li.className = 'list-group-item list-group-item-info';
+li.appendChild(document.createTextNode(value));
+
+document.getElementById("chatUl").appendChild(li);
+
+
+
+
+}
+
+
+
 </script>
 
 </html>
