@@ -89,10 +89,13 @@
     var sendButton = document.getElementById("sendMessage");
     sendButton.addEventListener('click',()=>{
        const message = document.getElementById("message").value;
-       const data = {};
-       data.message = message;
-
-       storeMessage(data); 
+       if(message != ''){
+            const data = {};
+            data.message = message;
+            storeMessage(data); 
+       }else{
+            alert('Please type something to send!!!');
+       }
 
     })
 
