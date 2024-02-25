@@ -59,13 +59,13 @@
 
                 <div class="col-md-11 col-sm-12 col-xs-12">
                     
-                    <input type="textarea" class="form-control" id="message">
+                    <textarea class="form-control" id="message"></textarea>
                 </div>
 
               
 
                 <div class="col-md-1 col-sm-12 col-xs-12">
-                    <button type="button" class="btn btn-success">Send</button>
+                    <button type="button" class="btn btn-success" id="sendMessage">Send</button>
                    
                 </div>
             </div>
@@ -84,6 +84,32 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 
+<script type="text/javascript">
+    var token = localStorage.getItem('token');
+    var sendButton = document.getElementById("sendMessage");
+    sendButton.addEventListener('click',()=>{
+       const message = document.getElementById("message").value;
+       const data = {};
+       data.message = message;
 
+       storeMessage(data); 
+
+    })
+
+    const storeMessage = async (data) => {
+        console.log(data)
+        try{
+                const res = await axios.post("http://localhost:5100/chat/postMessage",{data},{headers: {"Authorization":token}})
+                alert("Message Sent!!!");
+                console.log(res.data);
+
+            }catch(error){
+                if(error){
+                    alert("Something went wrong !!!");
+                }
+            }
+
+    }
+</script>
 
 </html>

@@ -15,9 +15,17 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 const Users = require('./models/users');
+const Chats = require('./models/chats');
 
 const usersRoutes = require('./routes/users');
 app.use('/user', usersRoutes);
+
+const chatsRoutes = require('./routes/chats');
+app.use('/chat', chatsRoutes);
+
+
+Chats.belongsTo(Users, {constraints: true, onDelete: 'CASCADE'});
+Users.hasMany(Chats)
 
 sequelize.sync().then(result=>{
     app.listen(5100);
