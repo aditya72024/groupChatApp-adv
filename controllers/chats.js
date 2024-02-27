@@ -33,7 +33,12 @@ exports.getChats = async (req,res,next) => {
 
     
     try{
-        
+
+        let chatsCount = await Chats.count({});
+        if(+chatsCount > 10){
+            chatsCount = +chatsCount - 10;
+        }
+        console.log(chatsCount);
 
         const data = await Chats.findAll({
             include: [{
@@ -41,13 +46,34 @@ exports.getChats = async (req,res,next) => {
               attributes: ['username'],
             }],
             attributes: ['message'],
+            offset: chatsCount,
             order: [['createdAt', 'ASC']],
+
+            limit: 10,
           })
 
-        
-        console.log(req.user.id);
-        console.log(data);
 
+
+        res.status(201).json(data);
+
+    }catch(err){
+        console.log(err);
+        res.status(err.status || 500).json({status: err.status || 500, message: "Something Went Wrong!!!"})
+        
+    }
+}
+
+exports.getLastChatId = async (req,res,next) => {
+
+    
+    try{
+        
+
+        const data = await Chats.findAll({
+            attributes: ['id'],
+            order: [['createdAt', 'DESC']],
+            limit: 1,
+          })
 
         res.status(201).json(data);
 

@@ -93,8 +93,9 @@
 
 
             if(token !=="null"){
-
-                    loadChats();
+                setInterval(() => {
+                        loadChats()
+                    }, 500);
             }else{
                 window.location.href = "login.html";
             }
@@ -111,6 +112,8 @@
             const data = {};
             data.message = message;
             storeMessage(data); 
+
+            document.getElementById("message").value = "";
        }else{
             alert('Please type something to send!!!');
        }
@@ -136,31 +139,73 @@
 
         try{
 
-                const response = await axios.get(`http://localhost:5100/chat/getChats`, {headers: {"Authorization":token}})
-                console.log(response.data)
-                
+            
 
-                if(response.data.length > 0){
+                const lastdataid = await axios.get(`http://localhost:5100/chat/getLastChatId`, {headers: {"Authorization":token}})
 
-                    
-                    document.getElementById("chatUl").innerHTML = " ";
-                   
+                if(!!localStorage.getItem('chats') && JSON.parse(localStorage.getItem('chats')).length > 0){
 
-                    for(var i = 0; i<response.data.length;i++){
-                        showChats(response.data[i]);   
+                    if(lastdataid.data[0].id == JSON.parse(localStorage.getItem('chats')).length ){
+                        console.log('get from localstorage')
+                        document.getElementById("chatUl").innerHTML = " ";
+                        
+
+                        for(var i = 0; i<JSON.parse(localStorage.getItem('chats')).length;i++){
+                            showChats(JSON.parse(localStorage.getItem('chats'))[i]);   
+                        }
+                        chatDiv.style.display = "block";
+
+                    }else{
+                        setTimeout(()=>{
+                            getChatsData();
+                        },200)
                     }
-                    chatDiv.style.display = "block";
 
                 }else{
-                    chatDiv.style.display = "none";
+                            getChatsData();   
                 }
 
             }catch(error){
                 if(error){
-                    alert("Something went wrong !!!");
-                }
+                     alert("Something went wrong !!!");
+                 }
             }
 
+    }
+
+
+    const getChatsData = async () => {
+
+        try{
+
+        
+                    const response = await axios.get(`http://localhost:5100/chat/getChats`, {headers: {"Authorization":token}})
+
+                    if(response.data.length > 0){
+
+                        console.log(response.data);
+
+                        localStorage.setItem('chats', JSON.stringify(response.data));
+
+                        
+                        document.getElementById("chatUl").innerHTML = " ";
+                    
+
+                        for(var i = 0; i<response.data.length;i++){
+                            showChats(response.data[i]);   
+                        }
+                        chatDiv.style.display = "block";
+
+                    }else{
+                        chatDiv.style.display = "none";
+                    }
+
+
+                }catch(error){
+                    if(error){
+                        alert("Something went wrong !!!");
+                    }
+            }            
     }
 
 
