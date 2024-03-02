@@ -36,55 +36,648 @@
 </head>
 <body>
 
-    <div class="container jumbotron" id="loginBlock">
 
-        
-            <h4 class="text-center">chatApp</h4>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4">
 
-<div class = "container">
-    <div class ="row">
-        <div class="col-md-12" id="chatDiv" style="display: none;"> 
-            <ul class="list-group" id="chatUl">
-         
-              
-              
-                
-                <li class="list-group-item list-group-item-info">You: Hi</li>
-                <li class="list-group-item list-group-item-light">He/She: Hello</li>
-             
-              </ul>
-        </div> 
-        <div class="col-md-12 mt-5" >
             <div class="row">
 
-                <div class="col-md-11 col-sm-12 col-xs-12">
+                <div class="col-md-12">
+
+                    <h5>Create Group</h5>
+            
+                    <div class="form-group">
+                        <label for="groupname">Group Name</label>
+                        <input type="text" class="form-control" id="groupname" placeholder="Group Name">
                     
-                    <textarea class="form-control" id="message"></textarea>
+                    </div>
+                    
+                
+                    <button type="submit" class="btn btn-primary" id="createGroup">Create Group</button>
                 </div>
 
-              
-
-                <div class="col-md-1 col-sm-12 col-xs-12">
-                    <button type="button" class="btn btn-success" id="sendMessage">Send</button>
-                   
+                <div class="col-md-12" style="margin-top:10px;">
+                    <div class="col-md-12" id="groupsDiv" style="display: block;padding:0px;"> 
+                        <ul class="list-group" id="groupsUl">
+                     
+                          
+                          
+                            
+                           
+                         
+                          </ul>
+                    </div> 
                 </div>
-            </div>
 
-        </div>  
-    </div>    
+            </div>    
+            
+
+
+        </div>
+        <div class="col-md-8">
+
+            <div class="container jumbotron" id="chatContainer" style="display:none;">
 
         
-        
-        
+                <h4 class="text-center">chatApp</h4>
+    
+    <div class = "container" >
+        <div class ="row">
+            <div class="col-md-12" id="chatDiv" style="display: none;"> 
+                <ul class="list-group" id="chatUl">
+             
+                  
+                  
+                    
+                    <li class="list-group-item list-group-item-info">You: Hi</li>
+                    <li class="list-group-item list-group-item-light">He/She: Hello</li>
+                 
+                  </ul>
+            </div> 
+            <div class="col-md-12 mt-5" >
+                <div class="row">
+    
+                    <div class="col-md-11 col-sm-12 col-xs-12">
+                        
+                        <textarea class="form-control" id="message"></textarea>
+                        <input type="hidden" class="form-control" id="chatGroupId"></textarea>
+                    </div>
+    
+                  
+    
+                    <div class="col-md-1 col-sm-12 col-xs-12">
+                        <button type="button" class="btn btn-success" id="sendMessage">Send</button>
+                       
+                    </div>
+                </div>
+    
+            </div>  
+        </div>    
+    
+            
+            
+            
+    
+              </div>
+        </div>
 
-          </div>
+        </div>
     </div>
+</div>    
+
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#invitationModal" id="invitationModalButton" style="display:none;">
+</button>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="invitationModal" tabindex="-1" role="dialog" aria-labelledby="invitationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="invitationModalLabel">Invite Friends</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+            <div class="form-group">
+                <label for="invitee">invitee</label>
+                <input type="email" class="form-control" id="invitee" placeholder="invitee">
+                <input type="hidden" id="inviteeGroup" value="">
+            
+            </div>
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="invitationModalClose">Close</button>
+          <button type="button" class="btn btn-primary" id="sendInvitation">Send Invitation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    
     
 </body>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 
-<script type="text/javascript">
+<script>
+
+var token = localStorage.getItem('token');
+
+var createGroupButton = document.getElementById("createGroup");
+var groupDiv = document.getElementById("groupsDiv");
+
+createGroupButton.addEventListener("click", createGroup);
+let chatInterval;
+window.addEventListener("DOMContentLoaded",()=>{
+
+
+    if(token !=="null"){
+    
+                loadGroups();
+                chatInterval = setInterval(runcontinousChat,2000) 
+    
+    }else{
+        window.location.href = "login.html";
+    }
+        
+
+
+})
+
+function runcontinousChat(){
+    console.log("am running");
+    let groupId = document.getElementById("chatGroupId").value;
+    if(groupId){
+        
+        let lis = document.querySelectorAll(".groups-li");
+        if(lis.length){
+            lis.forEach((li)=>{
+                console.log(li.getAttribute("data-id"),groupId)
+                if(li.getAttribute("data-id") && li.getAttribute("data-id") == groupId ){
+                    li.click();
+                }
+            })
+        }
+        
+    }
+}
+
+
+
+const loadGroups = async () =>{
+
+try{
+
+    
+
+        const lastdataid = await axios.get(`http://localhost:5100/group/getLastGroupId`, {headers: {"Authorization":token}})
+        if(lastdataid.data.length){
+
+                    if(!!localStorage.getItem('groups') && JSON.parse(localStorage.getItem('groups')).length > 0){
+        console.log("hi")
+                    if(lastdataid.data[0].id == JSON.parse(localStorage.getItem('groups')).length ){
+                        console.log('get from localstorage')
+                        document.getElementById("groupsUl").innerHTML = " ";
+                        
+
+                        for(var i = 0; i<JSON.parse(localStorage.getItem('groups')).length;i++){
+                            showGroups(JSON.parse(localStorage.getItem('groups'))[i]);   
+                        }
+                        groupDiv.style.display = "block";
+
+
+
+
+                    }else{
+                        setTimeout(()=>{
+                            getGroupsData();
+                        },200)
+                    }
+
+                }else{
+                        getGroupsData();   
+                }
+
+                var groupsLi = document.querySelectorAll(".groups-li");
+                var sendInvitations = document.querySelectorAll(".sendInvitation");
+                            
+                groupsLi.forEach((groupLi)=>{
+                    groupLi.addEventListener("click",showChatRoom);
+                })
+
+        }
+
+
+    }catch(error){
+        if(error){
+             alert("Something went wrong !!!");
+         }
+    }
+
+}
+
+
+
+
+
+
+
+function createGroup(){
+    const groupName = document.getElementById("groupname").value;
+
+    const data = {};
+    data.groupName = groupName;
+    addGroup(data);
+
+    var groupsLi = document.querySelectorAll(".groups-li");
+    var sendInvitations = document.querySelectorAll(".sendInvitation");
+                
+    groupsLi.forEach((groupLi)=>{
+        groupLi.addEventListener("click",showChatRoom);
+    })
+
+    // sendInvitations.forEach((sendInvitation)=>{
+    //     sendInvitation.addEventListener("click",sendInvitation);
+    // })
+}
+
+
+const addGroup = async (data) => {
+
+    console.log(data)
+            try{
+                const res = await axios.post("http://localhost:5100/group/createGroup",{data},{headers: {"Authorization":token}})
+                alert("Group Created!!!");
+                getGroupsData();
+
+             
+
+            }catch(error){
+                if(error){
+                    alert("Something went wrong !!!");
+                }
+            }
+}
+
+
+
+const getGroupsData = async () => {
+
+try{
+
+
+            const response = await axios.get(`http://localhost:5100/group/getGroups`, {headers: {"Authorization":token}})
+
+            if(response.data.length > 0){
+
+                console.log(response.data);
+
+                localStorage.setItem('groups', JSON.stringify(response.data));
+
+                
+                document.getElementById("groupsUl").innerHTML = " ";
+            
+
+                for(var i = 0; i<response.data.length;i++){
+                    showGroups(response.data[i]);   
+                }
+                groupsDiv.style.display = "block";
+                // var groupsLi = document.querySelectorAll(".groups-li");
+                // var sendInvitations = document.querySelectorAll(".sendInvitation");
+                
+                // groupsLi.forEach((groupLi)=>{
+                //     groupLi.addEventListener("click",showChatRoom);
+                // })
+
+                // sendInvitations.forEach((sendInvitation)=>{
+                //     sendInvitation.addEventListener("click",sendInvitation);
+                // })
+
+            }else{
+                groupsDiv.style.display = "none";
+            }
+
+
+        }catch(error){
+            if(error){
+                alert("Something went wrong !!!");
+            }
+    }            
+}
+
+
+function showGroups(data){
+
+
+        if(data){
+
+            groupDiv.style.display = "block";
+            
+        }  
+
+        const groupname = data.groupname;
+
+        const value = groupname ;
+
+        li = document.createElement("li");
+        li.setAttribute("data-id", data.id);
+
+
+
+
+        li.className = 'list-group-item list-group-item-info groups-li';
+        li.appendChild(document.createTextNode(value));
+
+        span = document.createElement("span");
+        span.setAttribute("group-id",data.id);
+        span.className = 'sendInvitation';
+        span.appendChild(document.createTextNode("Send Invitaion"));
+
+
+        li.appendChild(span);
+
+        document.getElementById("groupsUl").appendChild(li);
+     
+
+        
+
+
+}
+
+const showChatRoom = async (e) => {
+    if(e.target.classList.contains("sendInvitation")){
+        prepareInvitationModal(e);
+    }else{
+        prepareChats(e);
+        
+    }
+    
+}
+
+
+
+function prepareChats(e){
+
+    var sendButton = document.getElementById("sendMessage");
+            var chatDiv = document.getElementById("chatDiv");
+            var chatContainer = document.getElementById("chatContainer");
+            var chatGroupId = document.getElementById("chatGroupId")
+
+            chatContainer.style.display = "block" 
+            chatDiv.style.display = "block" 
+
+            chatGroupId.value = e.target.getAttribute("data-id");
+            sendButton.setAttribute("data-id",e.target.getAttribute("data-id"));
+            
+    
+        // const lastdataid = await axios.get(`http://localhost:5100/chat/getLastChatId/`+e.target.getAttribute("data-id"), {headers: {"Authorization":token}})
+        // if(lastdataid.data.length != 0){
+            
+                loadChatRoom(e)
+          
+            
+         
+
+                    sendButton.addEventListener('click',sendMessage);
+                    
+                    
+        // }
+        // else{
+        //     if(chatInterval){
+        //         console.log(chatInterval);
+        //         clearInterval(chatInterval);
+        //     }
+            
+            
+        //     document.getElementById("chatContainer").style.display = "none";
+        //     document.getElementById("chatDiv").style.display = "none";
+        //     document.getElementById("chatUl").innerHTML = " ";
+        //     console.log(document.getElementById("chatContainer"))
+
+        //     alert("No Chats Yet!!!");
+
+        // }
+
+}
+
+
+function prepareInvitationModal(e){
+
+        console.log(e.target)
+        document.getElementById("inviteeGroup").value = e.target.getAttribute("group-id");
+        document.getElementById("invitationModalButton").click();
+        document.getElementById("sendInvitation").addEventListener("click",prepareInvitation);
+}
+
+function prepareInvitation(){
+    let invitee = document.getElementById("invitee").value;
+    let inviteeGroup = document.getElementById("inviteeGroup").value;
+
+    let data = {};
+    data.invitee = invitee;
+    data.inviteeGroup = inviteeGroup;
+
+    sendInvitation(data);
+} 
+
+
+const sendInvitation = async (data) => {
+
+    try{
+                const res = await axios.post("http://localhost:5100/group/sendInvitation",{data},{headers: {"Authorization":token}})
+                alert("Invitation Sent");
+                // loadChats();
+
+            }catch(error){
+                if(error){
+                    alert("Something went wrong !!!");
+                }
+            }
+
+
+
+}
+
+
+
+
+const loadChatRoom = async (e) => {
+
+  
+        try{
+
+
+
+           
+
+            const lastdataid = await axios.get(`http://localhost:5100/chat/getLastChatId/`+e.target.getAttribute("data-id"), {headers: {"Authorization":token}})
+          
+
+            if(lastdataid.data.length){
+
+                
+
+                    if(!!localStorage.getItem('chats') && JSON.parse(localStorage.getItem('chats')).length > 0){
+                    
+                        
+                        if(lastdataid.data[0].id == JSON.parse(localStorage.getItem('chats')).length ){
+                        console.log('get from localstorage')
+                        
+                       
+
+
+                        showChats(JSON.parse(localStorage.getItem('chats')));
+
+
+                            //     for(var i = 0; i<JSON.parse(localStorage.getItem('chats')).length;i++){
+
+                            //         console.log(JSON.parse(localStorage.getItem('chats'))[i])
+
+                            //     showChats(JSON.parse(localStorage.getItem('chats'))[i]);   
+                            // }
+                            
+
+                        }else{
+                          
+                            console.log("getchat")
+                                getChatsData(e);
+                           
+                        }
+                   
+
+
+
+                }else{
+                    console.log("getchat")
+                            getChatsData(e);   
+                }
+
+            }else{
+
+                // stopChatInterval()
+                // e.preventDefault();
+                document.getElementById("chatUl").innerHTML = "";
+                console.log("no-data")
+            }
+
+
+
+           
+
+
+        }catch(error){
+        if(error){
+            alert("Something went wrong !!!");
+        }
+}
+
+}
+
+function stopChatInterval(){
+    clearInterval(chatInterval);
+}
+
+function sendMessage(e){
+    const message = document.getElementById("message").value;
+       const groupId = document.getElementById("chatGroupId").value;
+       if(message != ''){
+            const data = {};
+            data.message = message;
+            data.groupId = groupId;
+            storeMessage(data,e); 
+
+            document.getElementById("message").value = "";
+       }else{
+            alert('Please type something to send!!!');
+       }
+}
+
+
+
+    const storeMessage = async (data,e) => {
+        
+        try{
+                const res = await axios.post("http://localhost:5100/chat/postMessage",{data},{headers: {"Authorization":token}})
+                alert("Message Sent!!!");
+                loadChatRoom(e);
+
+            }catch(error){
+                if(error){
+                    alert("Something went wrong !!!");
+                }
+            }
+
+    }
+
+
+
+const getChatsData = async (e) => {
+
+try{
+    
+
+            const response = await axios.get(`http://localhost:5100/chat/getChats/`+e.target.getAttribute("data-id"), {headers: {"Authorization":token}})
+
+            if(response.data.length > 0){
+
+               
+
+                localStorage.setItem('chats', JSON.stringify(response.data));
+
+                
+                showChats(response.data);
+            
+
+                // for(var i = 0; i<response.data.length;i++){
+                //     showChats(response.data[i]);   
+                // }
+                
+
+            }
+
+
+        }catch(error){
+            if(error){
+                alert("Something went wrong !!!");
+            }
+    }            
+}
+
+
+function showChats(datas){
+
+
+    document.getElementById("chatUl").innerHTML = " ";
+
+
+if(datas){
+    console.log(datas);
+
+    datas.forEach((data)=>{
+        const message = data.message;
+        const username = data.user.username;
+
+
+
+        const value = username + '-' + message;
+
+li = document.createElement("li");
+console.log(li)
+li.className = 'list-group-item list-group-item-info';
+
+
+
+li.appendChild(document.createTextNode(value));
+
+console.log(li)
+
+document.getElementById("chatUl").appendChild(li);
+    })
+    
+
+
+
+}  
+
+
+
+
+
+
+}
+
+
+
+
+
+</script>
+<!-- <script type="text/javascript">
     var token = localStorage.getItem('token');
     var sendButton = document.getElementById("sendMessage");
     var chatDiv = document.getElementById("chatDiv");
@@ -239,6 +832,6 @@ document.getElementById("chatUl").appendChild(li);
 
 
 
-</script>
+</script> -->
 
 </html>
