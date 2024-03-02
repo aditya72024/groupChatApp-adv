@@ -191,6 +191,7 @@ window.addEventListener("DOMContentLoaded",()=>{
 })
 
 function runcontinousChat(){
+    
     console.log("am running");
     let groupId = document.getElementById("chatGroupId").value;
     if(groupId){
@@ -244,14 +245,19 @@ try{
                         getGroupsData();   
                 }
 
-                var groupsLi = document.querySelectorAll(".groups-li");
-                var sendInvitations = document.querySelectorAll(".sendInvitation");
+                console.log("entered")
+
+                // var groupsLi = document.querySelectorAll(".groups-li");
+                // var sendInvitations = document.querySelectorAll(".sendInvitation");
                             
-                groupsLi.forEach((groupLi)=>{
-                    groupLi.addEventListener("click",showChatRoom);
-                })
+                // groupsLi.forEach((groupLi)=>{
+                //     console.log("entered")
+                //     groupLi.addEventListener("click",showChatRoom);
+                // })
 
         }
+
+        
 
 
     }catch(error){
@@ -269,18 +275,31 @@ try{
 
 
 function createGroup(){
-    const groupName = document.getElementById("groupname").value;
+        const groupName = document.getElementById("groupname").value;
 
-    const data = {};
-    data.groupName = groupName;
-    addGroup(data);
+        if(groupName){
+            const data = {};
+            data.groupName = groupName;
+            addGroup(data);
 
-    var groupsLi = document.querySelectorAll(".groups-li");
-    var sendInvitations = document.querySelectorAll(".sendInvitation");
-                
-    groupsLi.forEach((groupLi)=>{
-        groupLi.addEventListener("click",showChatRoom);
-    })
+            var groupsLi = document.querySelectorAll(".groups-li");
+            var sendInvitations = document.querySelectorAll(".sendInvitation");
+                        
+            // groupsLi.forEach((groupLi)=>{
+            //     groupLi.addEventListener("click",showChatRoom);
+            // })
+    }else{
+        getGroupsData();
+        // var groupsLi = document.querySelectorAll(".groups-li");
+        //     var sendInvitations = document.querySelectorAll(".sendInvitation");
+                        
+        //     groupsLi.forEach((groupLi)=>{
+        //         groupLi.addEventListener("click",showChatRoom);
+        //     })
+        alert("Group Name can't be empty!!!");
+    }
+
+
 
     // sendInvitations.forEach((sendInvitation)=>{
     //     sendInvitation.addEventListener("click",sendInvitation);
@@ -385,7 +404,17 @@ function showGroups(data){
         document.getElementById("groupsUl").appendChild(li);
      
 
-        
+                var groupsLi = document.querySelectorAll(".groups-li");
+                var sendInvitations = document.querySelectorAll(".sendInvitation");
+                
+                groupsLi.forEach((groupLi)=>{
+                    groupLi.addEventListener("click",showChatRoom);
+                })
+
+                sendInvitations.forEach((sendInvitation)=>{
+                    sendInvitation.addEventListener("click",sendInvitation);
+                })
+
 
 
 }
@@ -633,7 +662,7 @@ try{
 function showChats(datas){
 
 
-    document.getElementById("chatUl").innerHTML = " ";
+      document.getElementById("chatUl").innerHTML = " ";
 
 
 if(datas){
