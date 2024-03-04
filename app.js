@@ -41,7 +41,7 @@ GroupAdmins.belongsTo(Users, {constraints: true, onDelete: 'CASCADE'})
 GroupAdmins.belongsTo(Groups, {constraints: true, onDelete: 'CASCADE'})
 
 Users.hasMany(GroupAdmins)
-Groups.hasOne(GroupAdmins)
+Groups.hasMany(GroupAdmins)
 
 
 Users.belongsToMany(Groups, {through: UserGroups})

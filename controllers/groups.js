@@ -1,5 +1,7 @@
 const Users = require('../models/users.js');
 const userGroups = require('../models/usergroups.js');
+const GroupAdmins = require('../models/groupadmins.js');
+const Chats = require('../models/chats.js');
 const Groups = require('../models/groups.js');
 const groupInvitations = require('../models/groupinvitations.js');
 const sequelize = require('../util/database');
@@ -129,5 +131,121 @@ exports.getLastGroupId = async (req,res,next) => {
     }
 }
 
+
+exports.getUsers = async (req,res,next) => {
+
+   
+    try{
+
+        const data = await Groups.findOne({
+            where: {id: req.params.groupId},
+            include: [{model: Users},{model: GroupAdmins}],
+           
+
+        });
+        
+        // console.log(data)
+        res.status(201).json(data);
+
+    }catch(err){
+        console.log(err);
+        res.status(err.status || 500).json({status: err.status || 500, message: "Something Went Wrong!!!"})
+    }
+}
+
+
+
+exports.removeUser = async (req,res,next) => {
+
+    console.log("hiiiiii");
+    const t = await sequelize.transaction();
+
+    try{
+
+
+        
+
+        await userGroups.destroy(
+            {where: {groupId: req.body.data.groupId, userId: req.body.data.userId}},
+            {transaction: t});
+
+        await Chats.destroy(
+                {where: {groupId: req.body.data.groupId, userId: req.body.data.userId}},
+                {transaction: t});    
+
+        await groupInvitations.destroy(
+                    {where: {groupId: req.body.data.groupId, userId: req.body.data.userId}},
+                    {transaction: t});            
+
+
+                    const data = await Groups.findOne({
+                        where: {id: req.body.data.groupId},
+                        include: [{model: Users},{model: GroupAdmins}],
+                       
+            
+                    });
+                    
+                    // console.log(data)
+                      
+    
+        
+         await t.commit();
+    
+    
+         res.status(201).json(data);
+
+
+    }catch(error){
+        await t.rollback();
+        res.status(500).json({status: res.status || 500,  message: res.message || "Something went wrong!!!", error:error});
+    }
+}
+
+
+exports.makeAdmin = async (req,res,next) => {
+
+  
+    const t = await sequelize.transaction();
+
+    try{
+
+
+
+        const groupCreated = await GroupAdmins.create({
+            userId: req.body.data.userId,
+            groupId: req.body.data.groupId
+
+        },{transaction: t})   
+        
+        
+        await t.commit();
+
+       
+
+            const data = await Groups.findOne({
+                where: {id: req.body.data.groupId},
+                include: [{model: Users},{model: GroupAdmins}],
+            
+
+            });
+            
+      
+
+                            
+                    // console.log(data)
+                      
+    
+        
+        
+    
+    
+         res.status(201).json(data);
+
+
+    }catch(error){
+        await t.rollback();
+        res.status(500).json({status: res.status || 500,  message: res.message || "Something went wrong!!!", error:error});
+    }
+}
 
 
