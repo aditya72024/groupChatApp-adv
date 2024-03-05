@@ -680,11 +680,11 @@ if(datas){
 
             datas.groupadmins.forEach((groupadmin)=>{
 
-                if(groupadmin.userId != data.id){
+                if(groupadmin.userId != data.id ){
                     adminFlag += 0;
                     }else{
                         adminFlag += 1;
-                    }
+                }
 
 
 
@@ -693,8 +693,12 @@ if(datas){
                 
             })
 
+            
+
+
+
             if(adminFlag == 1){
-               
+                console.log(data.id, adminFlag)
 
                 i = document.createElement("i")
                 i.className = "fa fa-graduation-cap ownerAdmin";
@@ -707,6 +711,17 @@ if(datas){
                 li.appendChild(i);
             }else{
 
+                
+
+                // console.log(parseJwt(token))
+                    if(parseJwt(token).userId != data.id){
+                        i = document.createElement("i")
+                        i.className = "fa fa-handshake-o makeAdmin";
+                        i.setAttribute("user-id", data.id)
+                        i.setAttribute("group-id", groupId)
+                        i.setAttribute("aria-hidden","true")
+                        li.appendChild(i);
+                    }
                     i = document.createElement("i")
                     i.className = "fa fa-times removeUser";
                     i.setAttribute("user-id", data.id)
@@ -714,13 +729,9 @@ if(datas){
                     i.setAttribute("aria-hidden","true")
                     li.appendChild(i);
 
-                    i = document.createElement("i")
+                    
 
-                    i.className = "fa fa-handshake-o makeAdmin";
-                    i.setAttribute("user-id", data.id)
-                    i.setAttribute("group-id", groupId)
-                    i.setAttribute("aria-hidden","true")
-                    li.appendChild(i);
+
 
             }
 

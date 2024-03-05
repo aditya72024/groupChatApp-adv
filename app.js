@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 
 const sequelize = require('./util/database');
@@ -31,6 +32,13 @@ const groupRoutes = require('./routes/groups');
 app.use('/group', groupRoutes);
 
 
+app.use((req,res) => {
+    res.sendFile(path.join(__dirname, req.url));
+})
+
+
+
+
 Chats.belongsTo(Users, {constraints: true, onDelete: 'CASCADE'})
 Chats.belongsTo(Groups, {constraints: true, onDelete: 'CASCADE'})
 Users.hasMany(Chats)
@@ -51,9 +59,6 @@ GroupInvitations.belongsTo(Groups, {constraints: true, onDelete: 'CASCADE'})
 GroupInvitations.belongsTo(Users, {constraints: true, onDelete: 'CASCADE'})
 Users.hasMany(GroupInvitations)
 Groups.hasMany(GroupInvitations)
-
-
-
 
 
 
