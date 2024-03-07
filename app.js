@@ -64,7 +64,7 @@ Groups.hasMany(GroupInvitations)
 
 
 sequelize.sync().then(result=>{
-    app.listen(5100);
+    app.listen(5000);
 }).catch(err=>{
     console.log(err)
 })
